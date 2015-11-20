@@ -806,17 +806,17 @@ function LunaUnitFrames.Raid_Displaypower(unitid)
 end
 
 function LunaUnitFrames.Raid_Aura(unitid)
-	if this.unit ~= unitid or not this.unit then
+	if not this.unit or this.unit ~= unitid then
 		return
 	end
 	local maxDebuffs = ((LunaOptions.frames["LunaRaidFrames"].centerIcon and PlayerClass == "PRIEST") and 2) or ((LunaOptions.frames["LunaRaidFrames"].centerIcon and PlayerClass == "DRUID") and 1) or 3
 	local texture,_,dispeltype = UnitDebuff(this.unit,1,1)
 	local lastfound = 1
-	if dispeltype and LunaOptions.HighlightDebuffs then
-		this:SetBackdropColor(unpack(LunaOptions.DebuffTypeColor[dispeltype]),1)
-	else
+	--if dispeltype and LunaOptions.HighlightDebuffs then
+	--	this:SetBackdropColor(unpack(LunaOptions.DebuffTypeColor[dispeltype]),1)
+	--else
 		this:SetBackdropColor(0,0,0,1)
-	end
+	--end
 	for i=1, maxDebuffs do
 		texture,_,dispeltype = UnitDebuff(this.unit,i,1)
 		if not dispeltype and not LunaOptions.showdispelable then
@@ -921,8 +921,10 @@ function LunaUnitFrames.Raid_Aura(unitid)
 			if a or b or c then
 				if LunaOptions.frames["LunaRaidFrames"].texturebuff then
 					texture = UnitBuff(this.unit,h)
-					this.buffs[leftover].texture:SetTexture(texture)
-					this.buffs[leftover]:Show()
+					if this.buffs then
+						this.buffs[leftover].texture:SetTexture(texture)
+						this.buffs[leftover]:Show()
+					end
 				else
 					this.buffs[leftover].texture:SetTexture(a and 1 or 0, b and 1 or 0, c and 1 or 0)
 					this.buffs[leftover]:Show()
@@ -1142,8 +1144,10 @@ function LunaUnitFrames.Raid_Update()
 					if a or b or c then
 						if LunaOptions.frames["LunaRaidFrames"].texturebuff then
 							texture = UnitBuff(LunaUnitFrames.frames.members[i].unit,h)
-							LunaUnitFrames.frames.members[i].buffs[leftover].texture:SetTexture(texture)
-							LunaUnitFrames.frames.members[i].buffs[leftover]:Show()
+							if LunaUnitFrames.frames.members[i].buffs then
+								LunaUnitFrames.frames.members[i].buffs[leftover].texture:SetTexture(texture)
+								LunaUnitFrames.frames.members[i].buffs[leftover]:Show()
+							end
 						else
 							LunaUnitFrames.frames.members[i].buffs[leftover].texture:SetTexture(a and 1 or 0, b and 1 or 0, c and 1 or 0)
 							LunaUnitFrames.frames.members[i].buffs[leftover]:Show()
