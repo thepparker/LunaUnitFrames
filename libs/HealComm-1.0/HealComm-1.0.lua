@@ -1327,6 +1327,10 @@ function HealComm:getRejuTime(unit)
 end
 
 function HealComm:getRenewTime(unit)
+	if unit == "Unknown"
+		return
+	end
+	
 	local dbUnit = HealComm.Hots[UnitName(unit)]
 	if dbUnit and dbUnit["Renew"] and (dbUnit["Renew"].start + dbUnit["Renew"].dur) > GetTime() then
 		return dbUnit["Renew"].start, dbUnit["Renew"].dur

@@ -921,7 +921,7 @@ function LunaUnitFrames.Raid_Aura(unitid)
 			if a or b or c then
 				if LunaOptions.frames["LunaRaidFrames"].texturebuff then
 					texture = UnitBuff(this.unit,h)
-					if this.buffs then
+					if this.buffs and this.buffs[leftover] ~= nil then
 						this.buffs[leftover].texture:SetTexture(texture)
 						this.buffs[leftover]:Show()
 					end
@@ -1144,7 +1144,7 @@ function LunaUnitFrames.Raid_Update()
 					if a or b or c then
 						if LunaOptions.frames["LunaRaidFrames"].texturebuff then
 							texture = UnitBuff(LunaUnitFrames.frames.members[i].unit,h)
-							if LunaUnitFrames.frames.members[i].buffs then
+							if LunaUnitFrames.frames.members[i].buffs and LunaUnitFrames.frames.members[i].buffs[leftover] ~= nil then
 								LunaUnitFrames.frames.members[i].buffs[leftover].texture:SetTexture(texture)
 								LunaUnitFrames.frames.members[i].buffs[leftover]:Show()
 							end
