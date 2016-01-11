@@ -810,48 +810,55 @@ function LunaUnitFrames.Raid_Aura(unitid)
 		return
 	end
 	local maxDebuffs = ((LunaOptions.frames["LunaRaidFrames"].centerIcon and PlayerClass == "PRIEST") and 2) or ((LunaOptions.frames["LunaRaidFrames"].centerIcon and PlayerClass == "DRUID") and 1) or 3
-	local texture,_,dispeltype = UnitDebuff(this.unit,1,1)
+
 	local lastfound = 1
+	local debuffCount = 0
 	--if dispeltype and LunaOptions.HighlightDebuffs then
 	--	this:SetBackdropColor(unpack(LunaOptions.DebuffTypeColor[dispeltype]),1)
 	--else
 		this:SetBackdropColor(0,0,0,1)
 	--end
-	for i=1, maxDebuffs do
-		texture,_,dispeltype = UnitDebuff(this.unit,i,1)
-		if not dispeltype and not LunaOptions.showdispelable then
-			for z=lastfound, 16 do
-				texture,_,dispeltype = UnitDebuff(this.unit,z)
-				if not dispeltype and texture then
-					lastfound = z + 1
-					break
+	classDispellable = CLASS_DISPELS[PlayerClass]
+	for i = 1, 16 do
+		texture,_,dispeltype = UnitDebuff(this.unit,i)
+
+		-- We have a debuff. If we're only showing dispellable debuffs and the player can dispel
+		-- it, show it. If we're not showing dispellable debuffs show it regardless.
+		
+		if ((dispeltype and LunaOptions.showdispelable and classDispellable[dispeltype]) or (not LunaOptions.showdispelable)) then
+			debuffCount = debuffCount + 1
+			if texture and debuffCount <= maxDebuffs then
+				if LunaOptions.frames["LunaRaidFrames"].centerIcon then
+					this.centericons[debuffCount].texture:SetTexture(texture)
+					this.centericons[debuffCount]:Show()
+					this.debuffs[debuffCount]:Hide()
+				elseif LunaOptions.frames["LunaRaidFrames"].texturedebuff then
+					this.centericons[debuffCount]:Hide()
+					this.debuffs[debuffCount]:Show()
+					this.debuffs[debuffCount].texture:SetTexture(texture)
+				elseif dispeltype then
+					this.centericons[debuffCount]:Hide()
+					this.debuffs[debuffCount]:Show()
+					this.debuffs[debuffCount].texture:SetTexture(unpack(LunaOptions.DebuffTypeColor[dispeltype]))
+				else
+					this.centericons[debuffCount]:Hide()
+					this.debuffs[debuffCount]:Show()
+					this.debuffs[debuffCount].texture:SetTexture(0,0,0)
 				end
 			end
-		end
-		if texture and i <= maxDebuffs then
-			if LunaOptions.frames["LunaRaidFrames"].centerIcon then
-				this.centericons[i].texture:SetTexture(texture)
-				this.centericons[i]:Show()
-				this.debuffs[i]:Hide()
-			elseif LunaOptions.frames["LunaRaidFrames"].texturedebuff then
-				this.centericons[i]:Hide()
-				this.debuffs[i]:Show()
-				this.debuffs[i].texture:SetTexture(texture)
-			elseif dispeltype then
-				this.centericons[i]:Hide()
-				this.debuffs[i]:Show()
-				this.debuffs[i].texture:SetTexture(unpack(LunaOptions.DebuffTypeColor[dispeltype]))
-			else
-				this.centericons[i]:Hide()
-				this.debuffs[i]:Show()
-				this.debuffs[i].texture:SetTexture(0,0,0)
+
+			if debuffCount > maxDebuffs then
+				break
 			end
-		else
-			this.debuffs[i]:Hide()
-			this.centericons[i]:Hide()
 		end
 	end
-	
+
+	-- Remove any buff textures leftover from previous updates (i.e. hide frames above the debuff count)
+	for i = debuffCount+1, maxDebuffs do
+		this.debuffs[i]:Hide()
+		this.centericons[i]:Hide()
+	end
+
 
 	if LunaOptions.frames["LunaRaidFrames"].hottracker and PlayerClass == "PRIEST" then
 		if LunaOptions.frames["LunaRaidFrames"].centerIcon then

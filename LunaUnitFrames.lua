@@ -27,6 +27,15 @@ CLASS_ICON_TCOORDS = {
     ["PALADIN"]     = {0.0234375, 0.2265625, 0.5234375, 0.7265625}
 }
 
+-- Do some clever shit to speed up lookup
+CLASS_DISPELS = {
+	["DRUID"] = {["Curse"] = true, ["Poison"] = true},
+	["MAGE"] = {["Curse"] = true},
+	["PALADIN"] = {["Disease"] = true, ["Magic"] = true, ["Poison"] = true},
+	["PRIEST"] = {["Disease"] = true, ["Magic"] = true},
+	["SHAMAN"] = {["Disease"] = true, ["Poison"] = true}
+}
+
 function LunaUnitFrames:GetHealthString(unit)
 	local result
 	local Health, maxHealth
@@ -64,6 +73,28 @@ function LunaUnitFrames:GetPowerString(unit)
 		result = math.floor(((UnitMana(unit) / UnitManaMax(unit)) * 100)+0.5).."%\n"..result
 	end
 	return result
+end
+
+function LunaUnitFrames:GetUnitDispellableDebuff(unitid, count, playerclass)
+	classDispellable = CLASS_DISPELS[PlayerClass]
+
+	-- Iterate over debuffs until we hit 'count' instances of dispellable debuffs.
+	-- Return the detail of the count'th instance
+
+	local debuffcount = 0
+	for i = 1, 16 do
+		texture, _, dispeltype = UnitDebuff(unitid, i)
+
+		if classDispellable[dispeltype] ~= nil then
+			debuffcount = debuffcount + 1
+
+			if debuffcount == count then
+				return texture, _, dispeltype
+			end
+		end
+	end
+
+	return nil
 end
 
 function LunaUnitFrames:GetHealthColor(unit)
