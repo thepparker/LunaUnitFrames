@@ -822,6 +822,7 @@ function LunaUnitFrames.Raid_Aura(unitid)
 	for i = 1, 16 do
 		texture,_,dispeltype = UnitDebuff(this.unit,i)
 
+		dispeltype = dispeltype or IDENTIFIED_DEBUFFS[texture]
 		-- We have a debuff. If we're only showing dispellable debuffs and the player can dispel
 		-- it, show it. If we're not showing dispellable debuffs show it regardless.
 		

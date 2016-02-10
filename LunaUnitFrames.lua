@@ -29,11 +29,19 @@ CLASS_ICON_TCOORDS = {
 
 -- Do some clever shit to speed up lookup
 CLASS_DISPELS = {
-	["DRUID"] = {["Curse"] = true, ["Poison"] = true},
+	["WARRIOR"] = {},
 	["MAGE"] = {["Curse"] = true},
-	["PALADIN"] = {["Disease"] = true, ["Magic"] = true, ["Poison"] = true},
+	["ROGUE"] = {},
+	["DRUID"] = {["Curse"] = true, ["Poison"] = true},
+	["HUNTER"] = {},
+	["SHAMAN"] = {["Disease"] = true, ["Poison"] = true},
 	["PRIEST"] = {["Disease"] = true, ["Magic"] = true},
-	["SHAMAN"] = {["Disease"] = true, ["Poison"] = true}
+	["WARLOCK"] = {},
+	["PALADIN"] = {["Disease"] = true, ["Magic"] = true, ["Poison"] = true}
+}
+
+IDENTIFIED_DEBUFFS = {
+	["Interface\\Icons\\Spell_Shadow_PsychicScream"] = "Magic"
 }
 
 function LunaUnitFrames:GetHealthString(unit)
