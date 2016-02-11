@@ -805,153 +805,163 @@ function LunaUnitFrames.Raid_Displaypower(unitid)
 	end
 end
 
+-- Event handler for unit aura changes
 function LunaUnitFrames.Raid_Aura(unitid)
 	if not this.unit or this.unit ~= unitid then
 		return
 	end
+
+	LunaUnitFrames:Update_Raid_Auras(this)
+end
+
+function LunaUnitFrames:Update_Raid_Auras(frame)
 	local maxDebuffs = ((LunaOptions.frames["LunaRaidFrames"].centerIcon and PlayerClass == "PRIEST") and 2) or ((LunaOptions.frames["LunaRaidFrames"].centerIcon and PlayerClass == "DRUID") and 1) or 3
 
-	local lastfound = 1
-	local debuffCount = 0
-	--if dispeltype and LunaOptions.HighlightDebuffs then
-	--	this:SetBackdropColor(unpack(LunaOptions.DebuffTypeColor[dispeltype]),1)
-	--else
-		this:SetBackdropColor(0,0,0,1)
-	--end
-	classDispellable = CLASS_DISPELS[PlayerClass]
-	for i = 1, 16 do
-		texture,_,dispeltype = UnitDebuff(this.unit,i)
+    local lastfound = 1
+    local debuffCount = 0
+    
+    frame:SetBackdropColor(0,0,0,1)
+    classDispellable = CLASS_DISPELS[PlayerClass]
 
-		dispeltype = dispeltype or IDENTIFIED_DEBUFFS[texture]
-		-- We have a debuff. If we're only showing dispellable debuffs and the player can dispel
-		-- it, show it. If we're not showing dispellable debuffs show it regardless.
-		
-		if ((dispeltype and LunaOptions.showdispelable and classDispellable[dispeltype]) or (not LunaOptions.showdispelable)) then
-			debuffCount = debuffCount + 1
-			if texture and debuffCount <= maxDebuffs then
-				if LunaOptions.frames["LunaRaidFrames"].centerIcon then
-					this.centericons[debuffCount].texture:SetTexture(texture)
-					this.centericons[debuffCount]:Show()
-					this.debuffs[debuffCount]:Hide()
-				elseif LunaOptions.frames["LunaRaidFrames"].texturedebuff then
-					this.centericons[debuffCount]:Hide()
-					this.debuffs[debuffCount]:Show()
-					this.debuffs[debuffCount].texture:SetTexture(texture)
-				elseif dispeltype then
-					this.centericons[debuffCount]:Hide()
-					this.debuffs[debuffCount]:Show()
-					this.debuffs[debuffCount].texture:SetTexture(unpack(LunaOptions.DebuffTypeColor[dispeltype]))
-				else
-					this.centericons[debuffCount]:Hide()
-					this.debuffs[debuffCount]:Show()
-					this.debuffs[debuffCount].texture:SetTexture(0,0,0)
-				end
-			end
+    -- Hide weakened soul frame
+    local weakenedSoul = false
+    frame.wsoul:Hide()
+    for i = 1, 16 do
+        texture,_,dispeltype = UnitDebuff(frame.unit,i)
 
-			if debuffCount > maxDebuffs then
-				break
-			end
-		end
-	end
+        dispeltype = dispeltype or IDENTIFIED_DEBUFFS[texture]
+        -- We have a debuff. If we're only showing dispellable debuffs and the player can dispel
+        -- it, show it. If we're not showing dispellable debuffs show it regardless.
+        
+        if ((dispeltype and LunaOptions.showdispelable and classDispellable[dispeltype]) or (not LunaOptions.showdispelable)) then
+        	--if dispeltype and LunaOptions.HighlightDebuffs then
+			--	frame:SetBackdropColor(unpack(LunaOptions.DebuffTypeColor[dispeltype]))
+			--end
 
-	-- Remove any buff textures leftover from previous updates (i.e. hide frames above the debuff count)
-	for i = debuffCount+1, maxDebuffs do
-		this.debuffs[i]:Hide()
-		this.centericons[i]:Hide()
-	end
+            debuffCount = debuffCount + 1
+            if texture and debuffCount <= maxDebuffs then
+                if LunaOptions.frames["LunaRaidFrames"].centerIcon then
+                    frame.centericons[debuffCount].texture:SetTexture(texture)
+                    frame.centericons[debuffCount]:Show()
+                    frame.debuffs[debuffCount]:Hide()
+                elseif LunaOptions.frames["LunaRaidFrames"].texturedebuff then
+                    frame.centericons[debuffCount]:Hide()
+                    frame.debuffs[debuffCount]:Show()
+                    frame.debuffs[debuffCount].texture:SetTexture(texture)
+                elseif dispeltype then
+                    frame.centericons[debuffCount]:Hide()
+                    frame.debuffs[debuffCount]:Show()
+                    frame.debuffs[debuffCount].texture:SetTexture(unpack(LunaOptions.DebuffTypeColor[dispeltype]))
+                else
+                    frame.centericons[debuffCount]:Hide()
+                    frame.debuffs[debuffCount]:Show()
+                    frame.debuffs[debuffCount].texture:SetTexture(0,0,0)
+                end
+            end
 
+            if debuffCount > maxDebuffs then
+                break
+            end
+        end
 
-	if LunaOptions.frames["LunaRaidFrames"].hottracker and PlayerClass == "PRIEST" then
-		if LunaOptions.frames["LunaRaidFrames"].centerIcon then
-			this.centericons[3]:Hide()
-		else
-			this.centericons[1]:Hide()
-		end
-		for i=1,32 do
-			local texture = UnitBuff(this.unit,i)
-			if texture == HotTexture then
-				if LunaOptions.frames["LunaRaidFrames"].centerIcon then
-					this.centericons[3]:Show()
-					this.centericons[3].texture:SetTexture(texture)
-				else
-					this.centericons[1]:Show()
-					this.centericons[1].texture:SetTexture(texture)
-				end
-			end
-		end
-	elseif LunaOptions.frames["LunaRaidFrames"].hottracker and PlayerClass == "DRUID" then
-		if LunaOptions.frames["LunaRaidFrames"].centerIcon then
-			this.centericons[3]:Hide()
-			this.centericons[2]:Hide()
-		else
-			this.centericons[1]:Hide()
-			this.centericons[2]:Hide()
-		end
-		for i=1,32 do
-			local texture = UnitBuff(this.unit,i)
-			if texture == HotTexture then
-				if LunaOptions.frames["LunaRaidFrames"].centerIcon then
-					this.centericons[3]:Show()
-					this.centericons[3].texture:SetTexture(texture)
-				else
-					this.centericons[1]:Show()
-					this.centericons[1].texture:SetTexture(texture)
-				end
-			elseif texture == RegrTexture then
-				if LunaOptions.frames["LunaRaidFrames"].centerIcon then
-					this.centericons[2]:Show()
-					this.centericons[2].texture:SetTexture(texture)
-				else
-					this.centericons[2]:Show()
-					this.centericons[2].texture:SetTexture(texture)
-				end
-			end
-		end
-	end
+        if not weakenedSoul and LunaOptions.frames["LunaRaidFrames"].wsoul and PlayerClass == "PRIEST" and texture == "Interface\\Icons\\Spell_Holy_AshesToAshes" then
+            frame.wsoul:Show()
+            weakenedSoul = true
+        end
+    end
+
+    -- Remove any buff textures leftover from previous updates (i.e. hide frames above the debuff count)
+    for i = debuffCount+1, maxDebuffs do
+        frame.debuffs[i]:Hide()
+        frame.centericons[i]:Hide()
+    end
 
 
-	this.wsoul:Hide()
-	for i=1,16 do
-		if UnitDebuff(this.unit,i) == "Interface\\Icons\\Spell_Holy_AshesToAshes" and PlayerClass == "PRIEST" and LunaOptions.frames["LunaRaidFrames"].wsoul then
-			this.wsoul:Show()
-		end
-	end
-	local leftover = 1
-	for h=1,32 do
-		ScanTip:ClearLines()
-		ScanTip:SetUnitBuff(this.unit, h)
-		if ScanTipTextLeft1:GetText() then
-			local buffname = ScanTipTextLeft1:GetText()
-			buffname = string.lower(buffname)
-			local a = (string.find(buffname, string.lower(LunaOptions.Raidbuff)) and LunaOptions.Raidbuff ~= "")
-			local b = (string.find(buffname, string.lower(LunaOptions.Raidbuff2)) and LunaOptions.Raidbuff2 ~= "")
-			local c = (string.find(buffname, string.lower(LunaOptions.Raidbuff3)) and LunaOptions.Raidbuff3 ~= "")
-			if a or b or c then
-				if LunaOptions.frames["LunaRaidFrames"].texturebuff then
-					texture = UnitBuff(this.unit,h)
-					if this.buffs and this.buffs[leftover] ~= nil then
-						this.buffs[leftover].texture:SetTexture(texture)
-						this.buffs[leftover]:Show()
-					end
-				else
-					this.buffs[leftover].texture:SetTexture(a and 1 or 0, b and 1 or 0, c and 1 or 0)
-					this.buffs[leftover]:Show()
-				end
-				leftover = leftover + 1
-			end
-		end
-	end
-	if leftover == 1 then
-		this.buffs[3]:Hide()
-		this.buffs[2]:Hide()
-		this.buffs[1]:Hide()
-	elseif leftover == 2 then
-		this.buffs[3]:Hide()
-		this.buffs[2]:Hide()
-	elseif leftover == 3 then
-		this.buffs[3]:Hide()
-	end
+    if LunaOptions.frames["LunaRaidFrames"].hottracker and PlayerClass == "PRIEST" then
+        if LunaOptions.frames["LunaRaidFrames"].centerIcon then
+            frame.centericons[3]:Hide()
+        else
+            frame.centericons[1]:Hide()
+        end
+        for i=1,32 do
+            local texture = UnitBuff(frame.unit,i)
+            if texture == HotTexture then
+                if LunaOptions.frames["LunaRaidFrames"].centerIcon then
+                    frame.centericons[3]:Show()
+                    frame.centericons[3].texture:SetTexture(texture)
+                else
+                    frame.centericons[1]:Show()
+                    frame.centericons[1].texture:SetTexture(texture)
+                end
+            end
+        end
+    elseif LunaOptions.frames["LunaRaidFrames"].hottracker and PlayerClass == "DRUID" then
+        if LunaOptions.frames["LunaRaidFrames"].centerIcon then
+            frame.centericons[3]:Hide()
+            frame.centericons[2]:Hide()
+        else
+            frame.centericons[1]:Hide()
+            frame.centericons[2]:Hide()
+        end
+        for i=1,32 do
+            local texture = UnitBuff(frame.unit,i)
+            if texture == HotTexture then
+                if LunaOptions.frames["LunaRaidFrames"].centerIcon then
+                    frame.centericons[3]:Show()
+                    frame.centericons[3].texture:SetTexture(texture)
+                else
+                    frame.centericons[1]:Show()
+                    frame.centericons[1].texture:SetTexture(texture)
+                end
+            elseif texture == RegrTexture then
+                if LunaOptions.frames["LunaRaidFrames"].centerIcon then
+                    frame.centericons[2]:Show()
+                    frame.centericons[2].texture:SetTexture(texture)
+                else
+                    frame.centericons[2]:Show()
+                    frame.centericons[2].texture:SetTexture(texture)
+                end
+            end
+        end
+    end
+
+    local leftover = 1
+    for h=1,32 do
+        ScanTip:ClearLines()
+        ScanTip:SetUnitBuff(frame.unit, h)
+        if ScanTipTextLeft1:GetText() then
+            local buffname = ScanTipTextLeft1:GetText()
+            buffname = string.lower(buffname)
+            local a = (string.find(buffname, string.lower(LunaOptions.Raidbuff)) and LunaOptions.Raidbuff ~= "")
+            local b = (string.find(buffname, string.lower(LunaOptions.Raidbuff2)) and LunaOptions.Raidbuff2 ~= "")
+            local c = (string.find(buffname, string.lower(LunaOptions.Raidbuff3)) and LunaOptions.Raidbuff3 ~= "")
+            if a or b or c then
+                if LunaOptions.frames["LunaRaidFrames"].texturebuff then
+                    texture = UnitBuff(frame.unit,h)
+                    if frame.buffs and frame.buffs[leftover] ~= nil then
+                        frame.buffs[leftover].texture:SetTexture(texture)
+                        frame.buffs[leftover]:Show()
+                    end
+                else
+                    frame.buffs[leftover].texture:SetTexture(a and 1 or 0, b and 1 or 0, c and 1 or 0)
+                    frame.buffs[leftover]:Show()
+                end
+                leftover = leftover + 1
+            end
+        end
+    end
+    if leftover == 1 then
+        frame.buffs[3]:Hide()
+        frame.buffs[2]:Hide()
+        frame.buffs[1]:Hide()
+    elseif leftover == 2 then
+        frame.buffs[3]:Hide()
+        frame.buffs[2]:Hide()
+    elseif leftover == 3 then
+        frame.buffs[3]:Hide()
+    end
 end
+
 
 function LunaUnitFrames.Raid_Aggro(unit)
 	if not LunaOptions.aggro then
@@ -1039,141 +1049,12 @@ function LunaUnitFrames.Raid_Hot(unit, hot)
 end
 
 function LunaUnitFrames.Raid_Update()
+	-- Updates raid buffs and debuffs on roster change
 	local maxDebuffs = ((LunaOptions.frames["LunaRaidFrames"].centerIcon and PlayerClass == "PRIEST") and 2) or ((LunaOptions.frames["LunaRaidFrames"].centerIcon and PlayerClass == "DRUID") and 1) or 3
 	local texture,_,dispeltype
 	for i=1,80 do
 		if LunaUnitFrames.frames.members[i].unit then
-			local lastfound = 1
-			texture,_,dispeltype = UnitDebuff(LunaUnitFrames.frames.members[i].unit,1,1)
-			if dispeltype and LunaOptions.HighlightDebuffs then
-				LunaUnitFrames.frames.members[i]:SetBackdropColor(unpack(LunaOptions.DebuffTypeColor[dispeltype]))
-			else
-				LunaUnitFrames.frames.members[i]:SetBackdropColor(0,0,0,1)
-			end
-			for z=1, maxDebuffs do
-				texture,_,dispeltype = UnitDebuff(LunaUnitFrames.frames.members[i].unit,z,1)
-				if not dispeltype and not LunaOptions.showdispelable then
-					for z=lastfound, 16 do
-						texture,_,dispeltype = UnitDebuff(LunaUnitFrames.frames.members[i].unit,z)
-						if not dispeltype and texture then
-							lastfound = z + 1
-							break
-						end
-					end
-				end
-				if texture and z <= maxDebuffs then
-					if LunaOptions.frames["LunaRaidFrames"].centerIcon then
-						LunaUnitFrames.frames.members[i].centericons[z].texture:SetTexture(texture)
-						LunaUnitFrames.frames.members[i].centericons[z]:Show()
-						LunaUnitFrames.frames.members[i].debuffs[z]:Hide()
-					elseif LunaOptions.frames["LunaRaidFrames"].texturedebuff then
-						LunaUnitFrames.frames.members[i].centericons[z]:Hide()
-						LunaUnitFrames.frames.members[i].debuffs[z]:Show()
-						LunaUnitFrames.frames.members[i].debuffs[z].texture:SetTexture(texture)
-					elseif dispeltype then
-						LunaUnitFrames.frames.members[i].centericons[z]:Hide()
-						LunaUnitFrames.frames.members[i].debuffs[z]:Show()
-						LunaUnitFrames.frames.members[i].debuffs[z].texture:SetTexture(unpack(LunaOptions.DebuffTypeColor[dispeltype]))
-					else
-						LunaUnitFrames.frames.members[i].centericons[z]:Hide()
-						LunaUnitFrames.frames.members[i].debuffs[z]:Show()
-						LunaUnitFrames.frames.members[i].debuffs[z].texture:SetTexture(0,0,0)
-					end
-				else
-					LunaUnitFrames.frames.members[i].debuffs[z]:Hide()
-					LunaUnitFrames.frames.members[i].centericons[z]:Hide()
-				end
-			end
-			LunaUnitFrames.frames.members[i].wsoul:Hide()
-			for h=1,16 do
-				if UnitDebuff(LunaUnitFrames.frames.members[i].unit,h) == "Interface\\Icons\\Spell_Holy_AshesToAshes" and PlayerClass == "PRIEST" and LunaOptions.frames["LunaRaidFrames"].wsoul then
-					LunaUnitFrames.frames.members[i].wsoul:Show()
-				end
-			end
-			
-			if LunaOptions.frames["LunaRaidFrames"].hottracker and PlayerClass == "PRIEST" then
-				if LunaOptions.frames["LunaRaidFrames"].centerIcon then
-					LunaUnitFrames.frames.members[i].centericons[3]:Hide()
-				else
-					LunaUnitFrames.frames.members[i].centericons[1]:Hide()
-				end
-				for z=1,32 do
-					local texture = UnitBuff(LunaUnitFrames.frames.members[i].unit,z)
-					if texture == HotTexture then
-						if LunaOptions.frames["LunaRaidFrames"].centerIcon then
-							LunaUnitFrames.frames.members[i].centericons[3]:Show()
-							LunaUnitFrames.frames.members[i].centericons[3].texture:SetTexture(texture)
-						else
-							LunaUnitFrames.frames.members[i].centericons[1]:Show()
-							LunaUnitFrames.frames.members[i].centericons[1].texture:SetTexture(texture)
-						end
-					end
-				end
-			elseif LunaOptions.frames["LunaRaidFrames"].hottracker and PlayerClass == "DRUID" then
-				if LunaOptions.frames["LunaRaidFrames"].centerIcon then
-					LunaUnitFrames.frames.members[i].centericons[3]:Hide()
-					LunaUnitFrames.frames.members[i].centericons[2]:Hide()
-				else
-					LunaUnitFrames.frames.members[i].centericons[1]:Hide()
-					LunaUnitFrames.frames.members[i].centericons[2]:Hide()
-				end
-				for z=1,32 do
-					local texture = UnitBuff(LunaUnitFrames.frames.members[i].unit,z)
-					if texture == HotTexture then
-						if LunaOptions.frames["LunaRaidFrames"].centerIcon then
-							LunaUnitFrames.frames.members[i].centericons[3]:Show()
-							LunaUnitFrames.frames.members[i].centericons[3].texture:SetTexture(texture)
-						else
-							LunaUnitFrames.frames.members[i].centericons[1]:Show()
-							LunaUnitFrames.frames.members[i].centericons[1].texture:SetTexture(texture)
-						end
-					elseif texture == RegrTexture then
-						if LunaOptions.frames["LunaRaidFrames"].centerIcon then
-							LunaUnitFrames.frames.members[i].centericons[2]:Show()
-							LunaUnitFrames.frames.members[i].centericons[2].texture:SetTexture(texture)
-						else
-							LunaUnitFrames.frames.members[i].centericons[2]:Show()
-							LunaUnitFrames.frames.members[i].centericons[2].texture:SetTexture(texture)
-						end
-					end
-				end
-			end
-			
-			local leftover = 1
-			for h=1,32 do
-				ScanTip:ClearLines()
-				ScanTip:SetUnitBuff(LunaUnitFrames.frames.members[i].unit, h)
-				if ScanTipTextLeft1:GetText() then
-					local buffname = ScanTipTextLeft1:GetText()
-					buffname = string.lower(buffname)
-					local a = (string.find(buffname, string.lower(LunaOptions.Raidbuff)) and LunaOptions.Raidbuff ~= "")
-					local b = (string.find(buffname, string.lower(LunaOptions.Raidbuff2)) and LunaOptions.Raidbuff2 ~= "")
-					local c = (string.find(buffname, string.lower(LunaOptions.Raidbuff3)) and LunaOptions.Raidbuff3 ~= "")
-					if a or b or c then
-						if LunaOptions.frames["LunaRaidFrames"].texturebuff then
-							texture = UnitBuff(LunaUnitFrames.frames.members[i].unit,h)
-							if LunaUnitFrames.frames.members[i].buffs and LunaUnitFrames.frames.members[i].buffs[leftover] ~= nil then
-								LunaUnitFrames.frames.members[i].buffs[leftover].texture:SetTexture(texture)
-								LunaUnitFrames.frames.members[i].buffs[leftover]:Show()
-							end
-						else
-							LunaUnitFrames.frames.members[i].buffs[leftover].texture:SetTexture(a and 1 or 0, b and 1 or 0, c and 1 or 0)
-							LunaUnitFrames.frames.members[i].buffs[leftover]:Show()
-						end
-						leftover = leftover + 1
-					end
-				end
-			end
-			if leftover == 1 then
-				LunaUnitFrames.frames.members[i].buffs[3]:Hide()
-				LunaUnitFrames.frames.members[i].buffs[2]:Hide()
-				LunaUnitFrames.frames.members[i].buffs[1]:Hide()
-			elseif leftover == 2 then
-				LunaUnitFrames.frames.members[i].buffs[3]:Hide()
-				LunaUnitFrames.frames.members[i].buffs[2]:Hide()
-			elseif leftover == 3 then
-				LunaUnitFrames.frames.members[i].buffs[3]:Hide()
-			end
+			LunaUnitFrames:Update_Raid_Auras(LunaUnitFrames.frames.members[i])
 		end
 	end
 end
