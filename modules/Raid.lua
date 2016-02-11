@@ -486,8 +486,6 @@ function LunaUnitFrames:UpdateRaidRoster()
 		elseif RAID_SUBGROUP_LISTS then
 			for i=1,8 do
 				RaidRoster[i] = {}
-			end
-			for i=1,8 do
 				for z=1,5 do
 					if RAID_SUBGROUP_LISTS[i][z] then
 						RaidRoster[i][z] = UnitName("raid"..RAID_SUBGROUP_LISTS[i][z])
@@ -557,7 +555,7 @@ function LunaUnitFrames:UpdateRaidRoster()
 				else
 					frame.PowerBar:SetStatusBarColor(LunaOptions.PowerColors["Mana"][1], LunaOptions.PowerColors["Mana"][2], LunaOptions.PowerColors["Mana"][3])
 				end
-				LunaUnitFrames.Raid_Aura(frame.unit)
+				LunaUnitFrames:Update_UnitFrame_Auras(frame)
 				frame:Show()
 				if HealComm:UnitisResurrecting(UnitName(frame.unit)) then
 					frame.RezIcon:Show()
@@ -573,12 +571,12 @@ function LunaUnitFrames:UpdateRaidRoster()
 			numFrame = numFrame + 1
 		end
 	end
+	-- Hide left over frames if raid is not full
 	for i=numFrame, 40 do
 		LunaUnitFrames.frames.members[numFrame]:Hide()
 	end
 	LunaUnitFrames.UpdatePetRoster()
 	LunaUnitFrames:UpdateRaidLayout()
-	LunaUnitFrames.Raid_Update()
 end
 
 function LunaUnitFrames:UpdatePetRoster()
@@ -634,14 +632,12 @@ function LunaUnitFrames:UpdatePetRoster()
 			else
 				frame.PowerBar:SetStatusBarColor(LunaOptions.PowerColors["Mana"][1], LunaOptions.PowerColors["Mana"][2], LunaOptions.PowerColors["Mana"][3])
 			end
+			LunaUnitFrames:Update_UnitFrame_Auras(frame)
 			frame:Show()
 		else
 			frame.unit = nil
 			frame:Hide()
 		end
-	end
-	if enable then
-		LunaUnitFrames.Raid_Update()
 	end
 end
 
@@ -834,7 +830,6 @@ function LunaUnitFrames:UpdateRaidLayout()
 		LunaUnitFrames.frames.members[i].PowerBar:SetPoint("BOTTOMRIGHT", LunaUnitFrames.frames.members[i], "BOTTOMRIGHT")
 	end
 	LunaUnitFrames:SetRaidFrameSize()
-	LunaUnitFrames.Raid_Update()
 end
 
 function LunaUnitFrames.Raid_Displaypower(unitid)
@@ -857,11 +852,15 @@ function LunaUnitFrames.Raid_Aura(unitid)
 		return
 	end
 
-	LunaUnitFrames:Update_Raid_Auras(this)
+	LunaUnitFrames:Update_UnitFrame_Auras(this)
 end
 
-function LunaUnitFrames:Update_Raid_Auras(frame)
-	local maxDebuffs = ((LunaOptions.frames["LunaRaidFrames"].centerIcon and PlayerClass == "PRIEST") and 2) or ((LunaOptions.frames["LunaRaidFrames"].centerIcon and PlayerClass == "DRUID") and 1) or 3
+function LunaUnitFrames:Update_UnitFrame_Auras(frame)
+	if frame == nil or frame.unit == nil then
+		return
+	end
+	--local maxDebuffs = ((LunaOptions.frames["LunaRaidFrames"].centerIcon and PlayerClass == "PRIEST") and 2) or ((LunaOptions.frames["LunaRaidFrames"].centerIcon and PlayerClass == "DRUID") and 1) or 3
+	local maxDebuffs = 3
 
     local lastfound = 1
     local debuffCount = 0
@@ -971,7 +970,8 @@ function LunaUnitFrames:Update_Raid_Auras(frame)
         end
     end
 
-    local leftover = 1
+    local buffCount = 1
+    local maxBuffs = 3
     for h=1,32 do
         ScanTip:ClearLines()
         ScanTip:SetUnitBuff(frame.unit, h)
@@ -984,27 +984,25 @@ function LunaUnitFrames:Update_Raid_Auras(frame)
             if a or b or c then
                 if LunaOptions.frames["LunaRaidFrames"].texturebuff then
                     texture = UnitBuff(frame.unit,h)
-                    if frame.buffs and frame.buffs[leftover] ~= nil then
-                        frame.buffs[leftover].texture:SetTexture(texture)
-                        frame.buffs[leftover]:Show()
+                    if frame.buffs and frame.buffs[buffCount] ~= nil then
+                        frame.buffs[buffCount].texture:SetTexture(texture)
+                        frame.buffs[buffCount]:Show()
                     end
                 else
-                    frame.buffs[leftover].texture:SetTexture(a and 1 or 0, b and 1 or 0, c and 1 or 0)
-                    frame.buffs[leftover]:Show()
+                    frame.buffs[buffCount].texture:SetTexture(a and 1 or 0, b and 1 or 0, c and 1 or 0)
+                    frame.buffs[buffCount]:Show()
                 end
-                leftover = leftover + 1
+                buffCount = buffCount + 1
+
+                if buffCount > maxBuffs then
+                	break
+                end
             end
         end
     end
-    if leftover == 1 then
-        frame.buffs[3]:Hide()
-        frame.buffs[2]:Hide()
-        frame.buffs[1]:Hide()
-    elseif leftover == 2 then
-        frame.buffs[3]:Hide()
-        frame.buffs[2]:Hide()
-    elseif leftover == 3 then
-        frame.buffs[3]:Hide()
+
+    for i = buffCount, maxBuffs do
+    	frame.buffs[i]:Hide()
     end
 end
 
@@ -1094,13 +1092,11 @@ function LunaUnitFrames.Raid_Hot(unit, hot)
 	end
 end
 
-function LunaUnitFrames.Raid_Update()
-	-- Updates raid buffs and debuffs on roster change
-	local maxDebuffs = ((LunaOptions.frames["LunaRaidFrames"].centerIcon and PlayerClass == "PRIEST") and 2) or ((LunaOptions.frames["LunaRaidFrames"].centerIcon and PlayerClass == "DRUID") and 1) or 3
-	local texture,_,dispeltype
+function LunaUnitFrames.Raid_Auras_Update()
+	-- Updates all raid buffs and debuffs
 	for i=1,80 do
 		if LunaUnitFrames.frames.members[i].unit then
-			LunaUnitFrames:Update_Raid_Auras(LunaUnitFrames.frames.members[i])
+			LunaUnitFrames:Update_UnitFrame_Auras(LunaUnitFrames.frames.members[i])
 		end
 	end
 end
