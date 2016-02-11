@@ -1329,7 +1329,7 @@ function HealComm:getRejuTime(unit)
 end
 
 function HealComm:getRenewTime(unit)
-	if unit == "Unknown"
+	if unit == "Unknown" then
 		return
 	end
 	
