@@ -61,6 +61,7 @@ if( GetLocale() == "deDE" ) then
 	L["Essence of Sapphiron"] = "Essenz Saphirons"
 	L["The Eye of the Dead"] = "Das Auge des Todes"
 	L["Mortal Strike"] = "T\195\182dlicher Stoß"
+	L["Blood Fury"] = "Blood Fury"
 	L["Wound Poison"] = "Wundgift"
 	L["Curse of the Deadwood"] = "Fluch der Totenwaldfelle"
 	L["Veil of Shadow"] = "Schattenschleier"
@@ -113,6 +114,7 @@ elseif ( GetLocale() == "frFR" ) then
 	L["Essence of Sapphiron"] = "Essence de Saphiron"
 	L["The Eye of the Dead"] = "L'Oeil du mort"
 	L["Mortal Strike"] = "Frappe mortelle"
+	L["Blood Fury"] = "Blood Fury"
 	L["Wound Poison"] = "Poison douloureux"
 	L["Curse of the Deadwood"] = "Mal\195\169diction des Mort-bois"
 	L["Veil of Shadow"] = "Voile de l'ombre"
@@ -165,6 +167,7 @@ else
 	L["Essence of Sapphiron"] = "Essence of Sapphiron"
 	L["The Eye of the Dead"] = "The Eye of the Dead"
 	L["Mortal Strike"] = "Mortal Strike"
+	L["Blood Fury"] = "Blood Fury"
 	L["Wound Poison"] = "Wound Poison"
 	L["Curse of the Deadwood"] = "Curse of the Deadwood"
 	L["Veil of Shadow"] = "Veil of Shadow"
@@ -944,7 +947,8 @@ HealComm.Debuffs = {
 	[L["Gehennas' Curse"]] = {amount = 0, mod = 0.75, icon = "Interface\\Icons\\Spell_Shadow_GatherShadows"};
 	[L["Mortal Wound"]] = {amount = 0, mod = 0.1, icon = "Interface\\Icons\\Ability_CriticalStrike"};
 	[L["Necrotic Poison"]] = {amount = 0, mod = 0.9, icon = "Interface\\Icons\\Ability_Creature_Poison_03"};
-	[L["Necrotic Aura"]] = {amount = 0, mod = 1, icon = "Interface\\Icons\\Ability_Creature_Disease_05"}
+	[L["Necrotic Aura"]] = {amount = 0, mod = 1, icon = "Interface\\Icons\\Ability_Creature_Disease_05"};
+	[L["Blood Fury"]] = {amount = 0, mod = 0.5, icon = "Interface\\Icons\\Ability_Rogue_FeignDeath"}
 }
 	
 local function getSetBonus()
