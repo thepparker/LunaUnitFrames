@@ -573,7 +573,7 @@ function LunaUnitFrames:UpdateRaidRoster()
 	end
 	-- Hide left over frames if raid is not full
 	for i=numFrame, 40 do
-		LunaUnitFrames.frames.members[numFrame]:Hide()
+		LunaUnitFrames.frames.members[i]:Hide()
 	end
 	LunaUnitFrames.UpdatePetRoster()
 	LunaUnitFrames:UpdateRaidLayout()
@@ -759,13 +759,13 @@ function LunaUnitFrames:UpdateRaidLayout()
 		end
 		for z=1,getn(RaidRoster[i]) do
 			frame = LunaUnitFrames.frames.members[numFrame]
-			numFrame = numFrame + 1
+			
 			if z == 1 then
 				frame:ClearAllPoints()
 				frame:SetPoint(sAnchor, LunaUnitFrames.frames.headers[i], tAnchor)
 			else
 				frame:ClearAllPoints()
-				frame:SetPoint(sAnchor, LunaUnitFrames.frames.members[numFrame-2], tAnchor, xPadding, yPadding)
+				frame:SetPoint(sAnchor, LunaUnitFrames.frames.members[numFrame-1], tAnchor, xPadding, yPadding)
 			end
 			frame.HealthBar:ClearAllPoints()
 			if verticalHealth then
@@ -787,6 +787,8 @@ function LunaUnitFrames:UpdateRaidLayout()
 				frame.PowerBar:Hide()
 			end
 			frame.PowerBar:SetPoint("BOTTOMRIGHT", frame, "BOTTOMRIGHT")
+
+			numFrame = numFrame + 1
 		end
 	end
 	if LunaOptions.raidinterlock then
@@ -1015,6 +1017,8 @@ function LunaUnitFrames.Raid_Aggro(unit)
 	for i=1,80 do
 		if LunaUnitFrames.frames.members[i].unit and UnitIsUnit(LunaUnitFrames.frames.members[i].unit, unit) then
 			frame = LunaUnitFrames.frames.members[i]
+
+			break
 		end
 	end
 	if not frame then
