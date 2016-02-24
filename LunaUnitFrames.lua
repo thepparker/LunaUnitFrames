@@ -36,7 +36,7 @@ CLASS_DISPELS = {
 	["HUNTER"] = {},
 	["SHAMAN"] = {["Disease"] = true, ["Poison"] = true},
 	["PRIEST"] = {["Disease"] = true, ["Magic"] = true},
-	["WARLOCK"] = {},
+	["WARLOCK"] = {["Magic"] = true},
 	["PALADIN"] = {["Disease"] = true, ["Magic"] = true, ["Poison"] = true}
 }
 
