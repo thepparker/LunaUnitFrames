@@ -152,7 +152,7 @@ local function AdjustHealBar(frame)
 	end
 end
 
-local function UpdateRaidMember()
+local function Update_RaidUnit_Status()
 	local now = GetTime()
 	if this:IsShown() then
 		if not UnitExists(this.unit) then
@@ -166,56 +166,134 @@ local function UpdateRaidMember()
 		else
 			this:SetAlpha(0.5)
 		end
+
 		local color
 		if LunaOptions.hbarcolor then
-			color = LunaOptions.ClassColors[this.Class] or LunaOptions.MiscColors["friendly"]
+			color = LunaOptions.ClassColors[frame.Class] or LunaOptions.MiscColors["friendly"]
 		else
-			color = LunaUnitFrames:GetHealthColor(this.unit)
+			color = LunaUnitFrames:GetHealthColor(frame.unit)
 		end
-		this.HealthBar:SetMinMaxValues(0, UnitHealthMax(this.unit))
-		this.PowerBar:SetMinMaxValues(0, UnitManaMax(this.unit))
-		if LunaOptions.frames["LunaRaidFrames"].inverthealth then
-			if UnitIsConnected(this.unit) then
-				if UnitHealth(this.unit) < 2 then
-					this.bg:SetVertexColor(unpack(color))
-					this.bg:Show()
-					this.HealthBar:SetValue(0)
-					this.PowerBar:SetValue(0)
-					this.HealBar:Hide()
-				else
-					this.bg:Show()
-					this.bg:SetVertexColor(unpack(color))
-					this.HealthBar:SetStatusBarColor(0,0,0)
-					this.HealthBar:SetValue(UnitHealth(this.unit))
-					this.PowerBar:SetValue(UnitMana(this.unit))
-					AdjustHealBar(this)
-				end
-			else
-				this.bg:SetVertexColor(unpack(color))
-				this.bg:Show()
-				this.HealthBar:SetValue(0)
-				this.PowerBar:SetValue(0)
+
+		if UnitIsConnected(this.unit) then
+			if UnitHealth(this.unit) < 2 then
 				this.HealBar:Hide()
+			else
+				AdjustHealBar(this)
 			end
 		else
-			this.bg:Hide()
-			if UnitIsConnected(this.unit) then
-				if UnitHealth(this.unit) < 2 then
-					this.HealthBar:SetValue(0)
-					this.PowerBar:SetValue(0)
-					this.HealBar:Hide()
-				else
-					this.HealthBar:SetValue(UnitHealth(this.unit))
-					this.PowerBar:SetValue(UnitMana(this.unit))
-					this.HealthBar:SetStatusBarColor(unpack(color))
-					AdjustHealBar(this)
-				end
-			else
-				this.HealthBar:SetValue(0)
-				this.PowerBar:SetValue(0)
-				this.HealBar:Hide()
-			end
+			this.bg:SetVertexColor(unpack(color))
+			this.bg:Show()
+			this.HealthBar:SetValue(0)
+			this.PowerBar:SetValue(0)
+			this.HealBar:Hide()
 		end
+	end
+end
+
+function LunaUnitFrames.Update_RaidUnit_Health(unitid)
+	--DEFAULT_CHAT_FRAME:AddMessage("LUF: UNIT_HEALTH fired for " .. unitid)
+	local frame = nil
+
+	for i = 1, 80 do
+		local _frame = LunaUnitFrames.frames.members[i]
+		if _frame.unit and UnitIsUnit(_frame.unit, unitid) then
+			frame = _frame
+			break
+		end
+	end
+
+	if not frame then
+		return
+	end
+
+	LunaUnitFrames:Update_RaidFrame_Health(frame)
+end
+
+function LunaUnitFrames:Update_RaidFrame_Health(frame)
+	--DEFAULT_CHAT_FRAME:AddMessage("LUF: Have unit's frame")
+	-- Have unit frame for updated unit. Update the current health
+
+	local color
+	if LunaOptions.hbarcolor then
+		color = LunaOptions.ClassColors[frame.Class] or LunaOptions.MiscColors["friendly"]
+	else
+		color = LunaUnitFrames:GetHealthColor(frame.unit)
+	end
+
+	frame.HealthBar:SetMinMaxValues(0, UnitHealthMax(frame.unit))
+	
+	if LunaOptions.frames["LunaRaidFrames"].inverthealth then
+		if UnitIsConnected(frame.unit) then
+			if UnitHealth(frame.unit) < 2 then
+				frame.bg:SetVertexColor(unpack(color))
+				frame.bg:Show()
+				frame.HealthBar:SetValue(0)
+				frame.PowerBar:SetValue(0)
+				frame.HealBar:Hide()
+			else
+				frame.bg:Show()
+				frame.bg:SetVertexColor(unpack(color))
+				frame.HealthBar:SetStatusBarColor(0,0,0)
+				frame.HealthBar:SetValue(UnitHealth(frame.unit))
+			end
+		else
+			frame.bg:SetVertexColor(unpack(color))
+			frame.bg:Show()
+			frame.HealthBar:SetValue(0)
+			frame.PowerBar:SetValue(0)
+			frame.HealBar:Hide()
+		end
+	else
+		frame.bg:Hide()
+		if UnitIsConnected(frame.unit) then
+			if UnitHealth(frame.unit) < 2 then
+				frame.HealthBar:SetValue(0)
+				frame.PowerBar:SetValue(0)
+				frame.HealBar:Hide()
+			else
+				frame.HealthBar:SetValue(UnitHealth(frame.unit))
+				frame.HealthBar:SetStatusBarColor(unpack(color))
+			end
+		else
+			frame.HealthBar:SetValue(0)
+			frame.PowerBar:SetValue(0)
+			frame.HealBar:Hide()
+		end
+	end
+end
+
+function LunaUnitFrames.Update_RaidUnit_Power(unitid)
+	--DEFAULT_CHAT_FRAME:AddMessage("LUF: UNIT_POWER fired for " .. unitid)
+	local frame = nil
+
+	for i = 1, 80 do
+		local _frame = LunaUnitFrames.frames.members[i]
+		if _frame.unit and UnitIsUnit(_frame.unit, unitid) then
+			frame = _frame
+			break
+		end
+	end
+
+	if not frame then
+		return
+	end
+
+	LunaUnitFrames:Update_RaidFrame_Power(frame)
+end
+
+function LunaUnitFrames:Update_RaidFrame_Power(frame)
+	--DEFAULT_CHAT_FRAME:AddMessage("LUF: Have unit's frame")
+	-- Update unit's power...
+
+	frame.PowerBar:SetMinMaxValues(0, UnitManaMax(frame.unit))
+	if UnitIsConnected(frame.unit) then
+		if UnitHealth(frame.unit) < 2 then
+			frame.PowerBar:SetValue(0)
+		else
+			frame.PowerBar:SetValue(UnitMana(frame.unit))
+		end
+	else
+		frame.PowerBar:SetValue(0)
 	end
 end
 
@@ -447,10 +525,16 @@ function LunaUnitFrames:CreateRaidFrames()
 		LunaUnitFrames.frames.members[i]:RegisterEvent("UNIT_AURA")
 		LunaUnitFrames.frames.members[i]:RegisterEvent("UNIT_DISPLAYPOWER")
 		LunaUnitFrames.frames.members[i]:SetScript("OnEvent", RaidEventhandler)
-		LunaUnitFrames.frames.members[i]:SetScript("OnUpdate", UpdateRaidMember)
+		LunaUnitFrames.frames.members[i]:SetScript("OnUpdate", Update_RaidUnit_Status)
 	end
 	
 	LunaUnitFrames:UpdateRaidLayout()
+	AceEvent:RegisterEvent("UNIT_HEALTH", LunaUnitFrames.Update_RaidUnit_Health)
+	-- Register event for ENERGY, MANA and RAGE
+	AceEvent:RegisterEvent("UNIT_ENERGY", LunaUnitFrames.Update_RaidUnit_Power)
+	AceEvent:RegisterEvent("UNIT_MANA", LunaUnitFrames.Update_RaidUnit_Power)
+	AceEvent:RegisterEvent("UNIT_RAGE", LunaUnitFrames.Update_RaidUnit_Power)
+
 	AceEvent:RegisterEvent("UNIT_PET", LunaUnitFrames.QueuePetRosterUpdate)
 	AceEvent:RegisterEvent("Banzai_UnitGainedAggro", LunaUnitFrames.Raid_Aggro)
 	AceEvent:RegisterEvent("Banzai_UnitLostAggro", LunaUnitFrames.Raid_Aggro)
@@ -555,7 +639,9 @@ function LunaUnitFrames:UpdateRaidRoster()
 				else
 					frame.PowerBar:SetStatusBarColor(LunaOptions.PowerColors["Mana"][1], LunaOptions.PowerColors["Mana"][2], LunaOptions.PowerColors["Mana"][3])
 				end
-				LunaUnitFrames:Update_UnitFrame_Auras(frame)
+				LunaUnitFrames:Update_RaidFrame_Auras(frame)
+				LunaUnitFrames:Update_RaidFrame_Health(frame)
+				LunaUnitFrames:Update_RaidFrame_Power(frame)
 				frame:Show()
 				if HealComm:UnitisResurrecting(UnitName(frame.unit)) then
 					frame.RezIcon:Show()
@@ -632,7 +718,9 @@ function LunaUnitFrames:UpdatePetRoster()
 			else
 				frame.PowerBar:SetStatusBarColor(LunaOptions.PowerColors["Mana"][1], LunaOptions.PowerColors["Mana"][2], LunaOptions.PowerColors["Mana"][3])
 			end
-			LunaUnitFrames:Update_UnitFrame_Auras(frame)
+			LunaUnitFrames:Update_RaidFrame_Auras(frame)
+			LunaUnitFrames:Update_RaidFrame_Health(frame)
+			LunaUnitFrames:Update_RaidFrame_Power(frame)
 			frame:Show()
 		else
 			frame.unit = nil
@@ -854,10 +942,10 @@ function LunaUnitFrames.Raid_Aura(unitid)
 		return
 	end
 
-	LunaUnitFrames:Update_UnitFrame_Auras(this)
+	LunaUnitFrames:Update_RaidFrame_Auras(this)
 end
 
-function LunaUnitFrames:Update_UnitFrame_Auras(frame)
+function LunaUnitFrames:Update_RaidFrame_Auras(frame)
 	if frame == nil or frame.unit == nil then
 		return
 	end
@@ -925,11 +1013,6 @@ function LunaUnitFrames:Update_UnitFrame_Auras(frame)
 
 
     if LunaOptions.frames["LunaRaidFrames"].hottracker and PlayerClass == "PRIEST" then
-        if LunaOptions.frames["LunaRaidFrames"].centerIcon then
-            frame.centericons[3]:Hide()
-        else
-            frame.centericons[1]:Hide()
-        end
         for i=1,32 do
             local texture = UnitBuff(frame.unit,i)
             if texture == HotTexture then
@@ -943,13 +1026,6 @@ function LunaUnitFrames:Update_UnitFrame_Auras(frame)
             end
         end
     elseif LunaOptions.frames["LunaRaidFrames"].hottracker and PlayerClass == "DRUID" then
-        if LunaOptions.frames["LunaRaidFrames"].centerIcon then
-            frame.centericons[3]:Hide()
-            frame.centericons[2]:Hide()
-        else
-            frame.centericons[1]:Hide()
-            frame.centericons[2]:Hide()
-        end
         for i=1,32 do
             local texture = UnitBuff(frame.unit,i)
             if texture == HotTexture then
@@ -1068,6 +1144,7 @@ function LunaUnitFrames.Raid_Hot(unit, hot)
 		for i=1, 40 do
 			if LunaUnitFrames.frames.members[i].unit == unit then
 				frame = LunaUnitFrames.frames.members[i]
+				break
 			end
 		end
 	end
@@ -1100,7 +1177,7 @@ function LunaUnitFrames.Raid_Auras_Update()
 	-- Updates all raid buffs and debuffs
 	for i=1,80 do
 		if LunaUnitFrames.frames.members[i].unit then
-			LunaUnitFrames:Update_UnitFrame_Auras(LunaUnitFrames.frames.members[i])
+			LunaUnitFrames:Update_RaidFrame_Auras(LunaUnitFrames.frames.members[i])
 		end
 	end
 end
