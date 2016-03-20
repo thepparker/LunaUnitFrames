@@ -169,9 +169,9 @@ local function Update_RaidUnit_Status()
 
 		local color
 		if LunaOptions.hbarcolor then
-			color = LunaOptions.ClassColors[frame.Class] or LunaOptions.MiscColors["friendly"]
+			color = LunaOptions.ClassColors[this.Class] or LunaOptions.MiscColors["friendly"]
 		else
-			color = LunaUnitFrames:GetHealthColor(frame.unit)
+			color = LunaUnitFrames:GetHealthColor(this.unit)
 		end
 
 		if UnitIsConnected(this.unit) then
@@ -181,8 +181,6 @@ local function Update_RaidUnit_Status()
 				AdjustHealBar(this)
 			end
 		else
-			this.bg:SetVertexColor(unpack(color))
-			this.bg:Show()
 			this.HealthBar:SetValue(0)
 			this.PowerBar:SetValue(0)
 			this.HealBar:Hide()
@@ -223,41 +221,27 @@ function LunaUnitFrames:Update_RaidFrame_Health(frame)
 	frame.HealthBar:SetMinMaxValues(0, UnitHealthMax(frame.unit))
 	
 	if LunaOptions.frames["LunaRaidFrames"].inverthealth then
-		if UnitIsConnected(frame.unit) then
-			if UnitHealth(frame.unit) < 2 then
-				frame.bg:SetVertexColor(unpack(color))
-				frame.bg:Show()
-				frame.HealthBar:SetValue(0)
-				frame.PowerBar:SetValue(0)
-				frame.HealBar:Hide()
-			else
-				frame.bg:Show()
-				frame.bg:SetVertexColor(unpack(color))
-				frame.HealthBar:SetStatusBarColor(0,0,0)
-				frame.HealthBar:SetValue(UnitHealth(frame.unit))
-			end
-		else
+		if UnitHealth(frame.unit) < 2 then
 			frame.bg:SetVertexColor(unpack(color))
 			frame.bg:Show()
 			frame.HealthBar:SetValue(0)
 			frame.PowerBar:SetValue(0)
 			frame.HealBar:Hide()
+		else
+			frame.bg:Show()
+			frame.bg:SetVertexColor(unpack(color))
+			frame.HealthBar:SetStatusBarColor(0,0,0)
+			frame.HealthBar:SetValue(UnitHealth(frame.unit))
 		end
 	else
 		frame.bg:Hide()
-		if UnitIsConnected(frame.unit) then
-			if UnitHealth(frame.unit) < 2 then
-				frame.HealthBar:SetValue(0)
-				frame.PowerBar:SetValue(0)
-				frame.HealBar:Hide()
-			else
-				frame.HealthBar:SetValue(UnitHealth(frame.unit))
-				frame.HealthBar:SetStatusBarColor(unpack(color))
-			end
-		else
+		if UnitHealth(frame.unit) < 2 then
 			frame.HealthBar:SetValue(0)
 			frame.PowerBar:SetValue(0)
 			frame.HealBar:Hide()
+		else
+			frame.HealthBar:SetValue(UnitHealth(frame.unit))
+			frame.HealthBar:SetStatusBarColor(unpack(color))
 		end
 	end
 end
