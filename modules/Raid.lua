@@ -937,7 +937,7 @@ function LunaUnitFrames:Update_RaidFrame_Auras(frame)
 	local maxDebuffs = 3
 
     local lastfound = 1
-    local debuffCount = 0
+    local debuffCount = 1
     
     frame:SetBackdropColor(0,0,0,1)
     classDispellable = CLASS_DISPELS[PlayerClass]
@@ -957,7 +957,6 @@ function LunaUnitFrames:Update_RaidFrame_Auras(frame)
 			--	frame:SetBackdropColor(unpack(LunaOptions.DebuffTypeColor[dispeltype]))
 			--end
 
-            debuffCount = debuffCount + 1
             if texture and debuffCount <= maxDebuffs then
                 if LunaOptions.frames["LunaRaidFrames"].centerIcon then
                     frame.centericons[debuffCount].texture:SetTexture(texture)
@@ -976,7 +975,11 @@ function LunaUnitFrames:Update_RaidFrame_Auras(frame)
                     frame.debuffs[debuffCount]:Show()
                     frame.debuffs[debuffCount].texture:SetTexture(0,0,0)
                 end
+
+                debuffCount = debuffCount + 1
             end
+
+            
 
             if debuffCount > maxDebuffs then
                 break
@@ -990,7 +993,7 @@ function LunaUnitFrames:Update_RaidFrame_Auras(frame)
     end
 
     -- Remove any buff textures leftover from previous updates (i.e. hide frames above the debuff count)
-    for i = debuffCount+1, maxDebuffs do
+    for i = debuffCount, maxDebuffs do
         frame.debuffs[i]:Hide()
         frame.centericons[i]:Hide()
     end

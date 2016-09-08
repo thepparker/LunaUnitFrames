@@ -319,7 +319,7 @@ function OptionFunctions.ToggleDispelableDebuffs()
 	else
 		LunaOptions.showdispelable = nil
 	end
-	LunaUnitFrames.Raid_Update()
+	LunaUnitFrames.Raid_Auras_Update()
 end
 
 function OptionFunctions.ToggleTexDebuffs()
