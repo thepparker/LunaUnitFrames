@@ -328,7 +328,7 @@ function OptionFunctions.ToggleTexDebuffs()
 	else
 		LunaOptions.frames["LunaRaidFrames"].texturedebuff = nil
 	end
-	LunaUnitFrames.Raid_Update()
+	LunaUnitFrames.Raid_Auras_Update()
 end
 
 function OptionFunctions.ToggleTexBuffs()
@@ -337,7 +337,7 @@ function OptionFunctions.ToggleTexBuffs()
 	else
 		LunaOptions.frames["LunaRaidFrames"].texturebuff = nil
 	end
-	LunaUnitFrames.Raid_Update()
+	LunaUnitFrames.Raid_Auras_Update()
 end
 
 function OptionFunctions.ToggleAggro()
@@ -1447,7 +1447,7 @@ function OptionFunctions.ToggleWSoul()
 	else
 		LunaOptions.frames["LunaRaidFrames"].wsoul = nil
 	end
-	LunaUnitFrames.Raid_Update()
+	LunaUnitFrames.Raid_Auras_Update()
 end
 
 function OptionFunctions.ToggleHBarColor()
@@ -2378,7 +2378,7 @@ function LunaOptionsModule:CreateMenu()
 	LunaOptionsFrame.pages[9].Buffwatch:SetScript("OnEnterPressed", function()
 																		this:ClearFocus();
 																		LunaOptions.Raidbuff = this:GetText()
-																		LunaUnitFrames.Raid_Update()
+																		LunaUnitFrames.Raid_Auras_Update()
 																	end)
 																	
 	LunaOptionsFrame.pages[9].Buffwatch2 = CreateFrame("Editbox", "BuffwatchInput2", LunaOptionsFrame.pages[9], "InputBoxTemplate")
@@ -2390,7 +2390,7 @@ function LunaOptionsModule:CreateMenu()
 	LunaOptionsFrame.pages[9].Buffwatch2:SetScript("OnEnterPressed", function()
 																		this:ClearFocus();
 																		LunaOptions.Raidbuff2 = this:GetText()
-																		LunaUnitFrames.Raid_Update()
+																		LunaUnitFrames.Raid_Auras_Update()
 																	end)
 
 	LunaOptionsFrame.pages[9].Buffwatch3 = CreateFrame("Editbox", "BuffwatchInput3", LunaOptionsFrame.pages[9], "InputBoxTemplate")
@@ -2402,7 +2402,7 @@ function LunaOptionsModule:CreateMenu()
 	LunaOptionsFrame.pages[9].Buffwatch3:SetScript("OnEnterPressed", function()
 																		this:ClearFocus();
 																		LunaOptions.Raidbuff3 = this:GetText()
-																		LunaUnitFrames.Raid_Update()
+																		LunaUnitFrames.Raid_Auras_Update()
 																	end)
 	
 	LunaOptionsFrame.pages[9].RaidGrpNameswitch = CreateFrame("CheckButton", "RaidGroupNamesSwitch", LunaOptionsFrame.pages[9], "UICheckButtonTemplate")
