@@ -879,7 +879,7 @@ function LunaUnitFrames:UpdateRaidLayout()
 	for i=41, 80 do
 		if i == 41 then
 			LunaUnitFrames.frames.members[i]:ClearAllPoints()
-			LunaUnitFrames.frames.members[i]:SetPoint(sAnchor, LunaUnitFrames.frames.headers[9], tAnchor, xPadding, yPadding)
+			LunaUnitFrames.frames.members[i]:SetPoint(sAnchor, LunaUnitFrames.frames.headers[9], tAnchor, 0, 0)
 		else
 			LunaUnitFrames.frames.members[i]:ClearAllPoints()
 			LunaUnitFrames.frames.members[i]:SetPoint(sAnchor, LunaUnitFrames.frames.members[i-1], tAnchor, xPadding, yPadding)
