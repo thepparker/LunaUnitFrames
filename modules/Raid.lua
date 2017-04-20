@@ -118,9 +118,6 @@ local function RaidEventhandler()
 end
 
 local function AdjustHealBar(frame)
-	if not frame.HealBar then
-		return
-	end
 	local healed = HealComm:getHeal(UnitName(frame.unit))
 	local health, maxHealth = UnitHealth(frame.unit), UnitHealthMax(frame.unit)
 	local frameHeight, frameWidth = frame.HealthBar:GetHeight(), frame.HealthBar:GetWidth()
@@ -153,10 +150,20 @@ local function AdjustHealBar(frame)
 end
 
 local function Update_RaidUnit_Status()
+	this.updateTime = this.updateTime + arg1
+
+	if (this.updateTime < 0.1) then
+		return
+	end
+
+	this.updateTime = 0
+
 	local now = GetTime()
 	if this:IsShown() then
 		if not UnitExists(this.unit) then
-			this:Hide()
+			if this.unit ~= nil and not string.find(this.unit, "pet") then
+				DEFAULT_CHAT_FRAME:AddMessage("Unit " .. this.unit .. " no longer exists, yet frame is shown")
+			end
 			return
 		end
 		local _, time = LunaUnitFrames.proximity:GetUnitRange(this.unit)
@@ -167,18 +174,19 @@ local function Update_RaidUnit_Status()
 			this:SetAlpha(0.5)
 		end
 
-		local color
-		if LunaOptions.hbarcolor then
-			color = LunaOptions.ClassColors[this.Class] or LunaOptions.MiscColors["friendly"]
-		else
-			color = LunaUnitFrames:GetHealthColor(this.unit)
+		if (UnitIsCharmed(this.unit)) then
+			this.HealthBar:SetStatusBarColor(unpack(LunaOptions.MiscColors["hostile"]))
+
+			this.charmed = true
+		elseif (this.charmed) then
+			-- No longer charmed
+			this.charmed = false
+			LunaUnitFrames:Update_RaidFrame_Health(this)
 		end
 
 		if UnitIsConnected(this.unit) then
 			if UnitHealth(this.unit) < 2 then
 				this.HealBar:Hide()
-			else
-				AdjustHealBar(this)
 			end
 		else
 			this.HealthBar:SetValue(0)
@@ -212,7 +220,9 @@ function LunaUnitFrames:Update_RaidFrame_Health(frame)
 	-- Have unit frame for updated unit. Update the current health
 
 	local color
-	if LunaOptions.hbarcolor then
+	if LunaOptions.hbarcolor and frame.charmed then
+		color = LunaOptions.MiscColors["hostile"]
+	elseif LunaOptions.hbarcolor then
 		color = LunaOptions.ClassColors[frame.Class] or LunaOptions.MiscColors["friendly"]
 	else
 		color = LunaUnitFrames:GetHealthColor(frame.unit)
@@ -244,6 +254,8 @@ function LunaUnitFrames:Update_RaidFrame_Health(frame)
 			frame.HealthBar:SetStatusBarColor(unpack(color))
 		end
 	end
+
+	AdjustHealBar(frame)
 end
 
 function LunaUnitFrames.Update_RaidUnit_Power(unitid)
@@ -458,6 +470,15 @@ function LunaUnitFrames:CreateRaidFrames()
 		LunaUnitFrames.frames.members[i].wsoul.texture:SetAllPoints(LunaUnitFrames.frames.members[i].wsoul)
 		LunaUnitFrames.frames.members[i].wsoul.texture:SetTexture("Interface\\Icons\\Spell_Holy_AshesToAshes")
 		LunaUnitFrames.frames.members[i].wsoul:Hide()
+
+		LunaUnitFrames.frames.members[i].healreduc = CreateFrame("Frame", nil, LunaUnitFrames.frames.members[i].HealthBar)
+		LunaUnitFrames.frames.members[i].healreduc:SetBackdrop(LunaOptions.backdrop)
+		LunaUnitFrames.frames.members[i].healreduc:SetBackdropColor(0,0,0,1)
+		LunaUnitFrames.frames.members[i].healreduc:SetPoint("BOTTOMRIGHT", LunaUnitFrames.frames.members[i].wsoul, "BOTTOMLEFT")
+		LunaUnitFrames.frames.members[i].healreduc.texture = LunaUnitFrames.frames.members[i].healreduc:CreateTexture(nil, "OVERLAY", LunaUnitFrames.frames.members[i].healreduc)
+		LunaUnitFrames.frames.members[i].healreduc.texture:SetAllPoints(LunaUnitFrames.frames.members[i].healreduc)
+		LunaUnitFrames.frames.members[i].healreduc.texture:SetTexture("Interface\\Icons\\Ability_Warrior_SavageBlow")
+		LunaUnitFrames.frames.members[i].healreduc:Hide()
 		
 		LunaUnitFrames.frames.members[i].centericons = {}
 		
@@ -510,6 +531,9 @@ function LunaUnitFrames:CreateRaidFrames()
 		LunaUnitFrames.frames.members[i]:RegisterEvent("UNIT_DISPLAYPOWER")
 		LunaUnitFrames.frames.members[i]:SetScript("OnEvent", RaidEventhandler)
 		LunaUnitFrames.frames.members[i]:SetScript("OnUpdate", Update_RaidUnit_Status)
+
+		LunaUnitFrames.frames.members[i].updateTime = 0
+		LunaUnitFrames.frames.members[i].charmed = false
 	end
 	
 	LunaUnitFrames:UpdateRaidLayout()
@@ -524,6 +548,7 @@ function LunaUnitFrames:CreateRaidFrames()
 	AceEvent:RegisterEvent("Banzai_UnitLostAggro", LunaUnitFrames.Raid_Aggro)
 	AceEvent:RegisterEvent("HealComm_Ressupdate", LunaUnitFrames.Raid_Res)
 	AceEvent:RegisterEvent("HealComm_Hotupdate", LunaUnitFrames.Raid_Hot)
+	AceEvent:RegisterEvent("HealComm_Healupdate", LunaUnitFrames.Raid_Heal)
 end
 
 function LunaUnitFrames:UpdateRaidRoster()
@@ -764,6 +789,8 @@ function LunaUnitFrames:SetRaidFrameSize()
 		LunaUnitFrames.frames.members[i].aggro:SetWidth(height*0.25*(LunaOptions.frames["LunaRaidFrames"].cornericonscale or 1))
 		LunaUnitFrames.frames.members[i].wsoul:SetHeight(height*0.25*(LunaOptions.frames["LunaRaidFrames"].cornericonscale or 1))
 		LunaUnitFrames.frames.members[i].wsoul:SetWidth(height*0.25*(LunaOptions.frames["LunaRaidFrames"].cornericonscale or 1))
+		LunaUnitFrames.frames.members[i].healreduc:SetHeight(height*0.25*(LunaOptions.frames["LunaRaidFrames"].cornericonscale or 1))
+		LunaUnitFrames.frames.members[i].healreduc:SetWidth(height*0.25*(LunaOptions.frames["LunaRaidFrames"].cornericonscale or 1))
 		
 		for z=1, 3 do
 			LunaUnitFrames.frames.members[i].buffs[z]:SetHeight(height*0.25*(LunaOptions.frames["LunaRaidFrames"].cornericonscale or 1))
@@ -944,7 +971,9 @@ function LunaUnitFrames:Update_RaidFrame_Auras(frame)
 
     -- Hide weakened soul frame
     local weakenedSoul = false
+    local healReduc = false
     frame.wsoul:Hide()
+    frame.healreduc:Hide()
     for i = 1, 16 do
         texture,_,dispeltype = UnitDebuff(frame.unit,i)
 
@@ -979,12 +1008,23 @@ function LunaUnitFrames:Update_RaidFrame_Auras(frame)
                 debuffCount = debuffCount + 1
             end
 
-            
-
             if debuffCount > maxDebuffs then
                 break
             end
         end
+
+        -- Avoid scanning debuffs more than necessary
+        if (not healReduc) then
+	        ScanTip:ClearLines()
+	        ScanTip:SetUnitDebuff(frame.unit, i)
+	        local debufftext = ScanTipTextLeft2:GetText()
+
+	        if (debufftext and string.find(debufftext, "Healing effects reduced by")) then
+	        	healReduc = true
+	        	frame.healreduc.texture:SetTexture(texture)
+	        	frame.healreduc:Show()
+	        end
+    	end
 
         if not weakenedSoul and LunaOptions.frames["LunaRaidFrames"].wsoul and PlayerClass == "PRIEST" and texture == "Interface\\Icons\\Spell_Holy_AshesToAshes" then
             frame.wsoul:Show()
@@ -1158,6 +1198,26 @@ function LunaUnitFrames.Raid_Hot(unit, hot)
 	else
 		CooldownFrame_SetTimer(frame.centericons[2].cd,tonumber(start),tonumber(dur),1,1)
 	end
+end
+
+
+
+function LunaUnitFrames.Raid_Heal(unitName)
+	local frame
+
+	for i = 1,80 do
+		_frame = LunaUnitFrames.frames.members[i]
+		if (_frame.HealBar and UnitExists(_frame.unit) and UnitName(_frame.unit) == unitName) then
+			frame = _frame
+			break
+		end
+	end
+
+	if (frame == nil) then
+		return
+	end
+
+	AdjustHealBar(frame)
 end
 
 function LunaUnitFrames.Raid_Auras_Update()
